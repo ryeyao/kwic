@@ -109,6 +109,7 @@ public class Input extends Filter{
       
       int c = in_.read();
       while(c != -1){
+//    	  System.out.println("char read :" + (char)c);
         switch((byte) c){
         case '\n':          
           is_new_line = true;

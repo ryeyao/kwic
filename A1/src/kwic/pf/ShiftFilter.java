@@ -10,8 +10,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 /**
  * @author Rye
@@ -19,12 +22,12 @@ import java.util.HashMap;
  */
 public class ShiftFilter extends Filter {
 
-	private String filePath = null;
+	private FileInputStream file = null;
 	private ArrayList<String> noiseWords;
 	
-	public ShiftFilter(Pipe input, Pipe output, String filePath) {
+	public ShiftFilter(Pipe input, Pipe output, FileInputStream file) {
 		super(input, output);
-		this.filePath = filePath;
+		this.file = file;
 		this.noiseWords = new ArrayList<String>();
 		// TODO Auto-generated constructor stub
 	}
@@ -35,10 +38,12 @@ public class ShiftFilter extends Filter {
 		this.readNoiseWords();
 		try {
 			CharArrayWriter writer = new CharArrayWriter();
-			HashMap<String, String> lines = new HashMap<String, String>();
+//			HashMap<String, String> lines = new HashMap<String, String>();
+			Map<String, String> lines = new IdentityHashMap<String, String>();
 			int c;
 			c = input_.read();
 			while (c != -1) {
+				
 				writer.write(c);
 				// add line
 				if (((char) c) == '\n') {
@@ -50,6 +55,7 @@ public class ShiftFilter extends Filter {
 						lines.put(line.split(" ")[0], line.substring(line.indexOf(" ")));
 					}
 					writer.reset();
+//					System.out.println("line2 : " + line);
 				}
 
 				c = input_.read();
@@ -59,13 +65,15 @@ public class ShiftFilter extends Filter {
 			
 			// Write lines to output
 			for (String line : lines.keySet()) {
-				char[] lineChars = (line + " " +lines.get(line)).toCharArray();
+				char[] lineChars = (line +lines.get(line)).toCharArray();
 				for (int i = 0; i < lineChars.length; i++) {
-					output_.write(i);
+					output_.write((int)lineChars[i]);
 				}
 			}
 			
-			
+			writer.close();
+//			output_.write('\n');
+			output_.closeWriter();
 			
 			
 		} catch (IOException e) {
@@ -76,17 +84,17 @@ public class ShiftFilter extends Filter {
 	}
 	
 	private void readNoiseWords () {
-		
+		BufferedReader in;
 		try {
-			FileInputStream fis;
-			fis = new FileInputStream(this.filePath);
-			BufferedReader in = new BufferedReader(new InputStreamReader(fis,
-					"UTF-8"));
+			in = new BufferedReader(new InputStreamReader(this.file, "UTF-8"));
 			String word = in.readLine();
 			while (word != null) {
-				word = in.readLine();
+//				System.out.println("Noise word read: " + word);
 				this.noiseWords.add(word);
+				word = in.readLine();
 			}
+			in.close();
+			this.file.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -96,12 +104,17 @@ public class ShiftFilter extends Filter {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			
+		} finally {
+			
 		}
 	}
 	
-	private HashMap<String, String> trimLine (HashMap<String, String> lines) {
+	private Map<String, String> trimLine (Map<String, String> lines) {
 		for (String word : this.noiseWords) {
-			lines.remove(word);
+			while (lines.containsKey(word)) {
+				lines.remove(word);
+			}
 		}
 		return lines;
 	}

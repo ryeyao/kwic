@@ -37,6 +37,9 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The KWIC class implements the first architectural solution for the KWIC
@@ -110,10 +113,13 @@ public class KWIC {
 	 */
 
 	private int[][] alphabetized_;
-	
+
 	// New added +++++++++++++++++++++++++++++++++++
-	private char[] shift_chars_;
-			// +++++++++++++++++++++++++++++++++++++++++++++
+	private char[] shifts_chars_;
+	private int[] shifts_index_;
+	private int[] shifts_lines_len_;
+
+	// +++++++++++++++++++++++++++++++++++++++++++++
 
 	// ----------------------------------------------------------------------
 	/**
@@ -154,9 +160,6 @@ public class KWIC {
 
 	public void input(String file) {
 
-		// New added +++++++++++++++++++++++++++++++++++
-//		shift_chars_ = new char[];
-		// +++++++++++++++++++++++++++++++++++++++++++++
 		// initialize line index
 		line_index_ = new int[32];
 
@@ -362,6 +365,7 @@ public class KWIC {
 		// line numbers, the second row stores the starting indices in chars
 		// array
 		// of each particular circular shift
+
 		circular_shifts_ = new int[2][256];
 
 		// count of circular shifts
@@ -441,95 +445,6 @@ public class KWIC {
 			circular_shifts_[1] = tmp;
 		}
 
-	}
-
-	public void newCircularShift() {
-		// initialize the ciruclar shift matrix
-		// initial size = [2, 256], we had 32 as the initial line number,
-		// number of circular shifts per line is equal to words count,
-		// we assume 4 words per line
-		// in the first row of circular shift matrix we store original
-		// line numbers, the second row stores the starting indices in chars
-		// array
-		// of each particular circular shift
-		circular_shifts_ = new int[2][256];
-		
-		// count of circular shifts
-		int shift_count = 0;
-
-		// iterate through lines and make circular shifts
-		for (int i = 0; i < line_index_.length; i++) {
-
-			// end index of the i-th line
-			int line_end = 0;
-
-			// if i-th line is the last line then line end index is
-			// the index of the last character
-			if (i == (line_index_.length - 1))
-				line_end = chars_.length;
-
-			// otherwise line end index is starting index of the
-			// next line
-			else
-				line_end = line_index_[i + 1];
-
-			// iterate through characters of i-th line
-			for (int j = line_index_[i]; j < line_end; j++) {
-
-				// if there is the word delimiter or this is the start
-				// of the line (original line is the first circular shift)
-				// then the next character
-				// is the first character of the next circular shift
-				if ((chars_[j] == ' ') || (j == line_index_[i])) {
-
-					// if the shift matrix is full, we make a new shift matrix.
-					// the number of columns of the new matrix is the columns'
-					// count of the old
-					// matrix + 256
-					// at the end we copy the old matrix into the new one and
-					// work
-					// further with the new one
-					if (shift_count == circular_shifts_[0].length) {
-
-						// copy the line number row
-						int[] tmp = new int[shift_count + 256];
-						System.arraycopy(circular_shifts_[0], 0, tmp, 0,
-								shift_count);
-						circular_shifts_[0] = tmp;
-
-						// copy the indices row
-						tmp = new int[shift_count + 256];
-						System.arraycopy(circular_shifts_[1], 0, tmp, 0,
-								shift_count);
-						circular_shifts_[1] = tmp;
-					}
-
-					// set the original line number
-					circular_shifts_[0][shift_count] = i;
-					// set the starting index of this circular shift
-					circular_shifts_[1][shift_count] = (j == line_index_[i]) ? j
-							: j + 1;
-
-					// increment the shift count
-					shift_count++;
-				}
-
-			}
-		}
-
-		// set the columns size of shift matrix to the real number of shifts
-		if (shift_count != circular_shifts_[0].length) {
-
-			// copy the line number row
-			int[] tmp = new int[shift_count];
-			System.arraycopy(circular_shifts_[0], 0, tmp, 0, shift_count);
-			circular_shifts_[0] = tmp;
-
-			// copy the indices row
-			tmp = new int[shift_count];
-			System.arraycopy(circular_shifts_[1], 0, tmp, 0, shift_count);
-			circular_shifts_[1] = tmp;
-		}
 	}
 
 	// ----------------------------------------------------------------------
@@ -769,6 +684,155 @@ public class KWIC {
 	 * @return void
 	 */
 
+	public void newCircularShift() {
+
+		ArrayList<String> lines = new ArrayList<String>();
+		for (int i = 0; i < line_index_.length; i++) {
+
+			if (i == line_index_.length - 1) {
+//				System.out.println("Line_index_length is : "
+//						+ line_index_.length);
+//				System.out.println("chars_.length is : " + chars_.length);
+//				System.out.println("line_index_[i] is : " + line_index_[i]);
+				lines.add(String.copyValueOf(chars_, line_index_[i],
+						chars_.length - line_index_[i]));
+			} else {
+				lines.add(String.copyValueOf(chars_, line_index_[i],
+						line_index_[i + 1] - line_index_[i]));
+			}
+		}
+
+		String shift_chars_str = "";
+		int shifts_words_count = 0;
+		int shifts_lines_count = 0;
+		for (String line : lines) {
+			String[] wordsOfLine = line.split(" ");
+
+			for (String word : wordsOfLine) {
+				shifts_words_count++;
+				shifts_lines_count++;
+			}
+		}
+		
+		shifts_index_ = new int[shifts_words_count];
+		shifts_lines_len_ = new int[shifts_lines_count];
+		shifts_words_count = 0;
+		shifts_lines_count = 0;
+		
+		for (String line : lines) {
+			String[] wordsOfLine = line.split(" ");
+			for (String word : wordsOfLine) {
+				String shift_line = "";
+
+				if (line.indexOf(word) == 0) {
+					// The original line
+					shift_line += line;
+				} else {
+					shift_line += line.substring(line.indexOf(word));
+					shift_line += " "
+							+ line.substring(0, line.indexOf(word) - 1);
+				}
+
+//				System.out.println("shift_line is : " + shift_line);
+				if (shift_chars_str.length() == 0) {
+					// The first line
+					shifts_index_[shifts_words_count++] = 0;
+				} else {
+					shifts_index_[shifts_words_count++] = shift_chars_str
+							.length();
+				}
+
+				shift_chars_str += shift_line;
+				shifts_lines_len_[shifts_lines_count++] = shift_line
+						.length();
+			}
+		}
+		shifts_chars_ = new char[shift_chars_str.length()];
+		System.arraycopy(shift_chars_str.toCharArray(), 0, shifts_chars_, 0,
+				shift_chars_str.length());
+
+	}
+
+	public void newAlphabetizing() {
+		this.quickSort(shifts_index_, 0, shifts_index_.length - 1);
+	}
+	
+	private void swap(int[] array, int a, int b) {
+//		array[a] ^= array[b];
+//		array[b] ^= array[a];
+//		array[a] ^= array[b];
+		int tmp = array[a];
+		array[a] = array[b];
+		array[b] = tmp;
+	}
+
+	private void quickSort(int[] array, int first, int last) {
+		int i = first, j = 0;
+		if (first < last) {
+			j = this.partition(array, first, last);
+			swap(array, i, j);
+			swap(shifts_lines_len_, i, j);
+			this.quickSort(array, i, j - 1);
+			this.quickSort(array, j + 1, last);
+		}
+	}
+
+	private int partition(int[] array, int first, int last) {
+
+		int pivot = array[first];
+		int i = first + 1;
+		int j = last;
+		while (true) {
+			while (Character.toLowerCase(shifts_chars_[array[j--]]) > Character.toLowerCase(shifts_chars_[pivot]));
+			j++;
+			while (Character.toLowerCase(shifts_chars_[array[i++]]) < Character.toLowerCase(shifts_chars_[pivot]));
+			i--;
+			// swap the two elements
+			if (i < j) {
+				swap(array, i, j);
+				swap(shifts_lines_len_, i, j);
+				i++;
+				j--;
+			} else {
+				return j;
+			}
+		}
+	}
+ 
+	public void filter() {
+		String new_shifts_str = "";
+		for (int curr_index = 0; curr_index < shifts_index_.length; curr_index++) {
+			int shift_index = shifts_index_[curr_index];
+			if (shifts_chars_[shift_index] < '0'
+					|| shifts_chars_[shift_index] > '9') {
+				if (curr_index == shifts_index_.length - 1) {
+					new_shifts_str.concat(new String(shifts_chars_,
+							shift_index, shifts_chars_.length - shift_index));
+				} else {
+					int shift_index_next = shifts_index_[curr_index + 1];
+					String tmp = new String(shifts_chars_, shift_index,
+							shift_index_next - shift_index);
+
+					new_shifts_str.concat(tmp);
+				}
+			} else {
+				int[] new_shifts_index_ = new int[shifts_index_.length - 1];
+				System.arraycopy(shifts_index_, 0, new_shifts_index_, 0,
+						curr_index + 1);
+				System.arraycopy(shifts_index_, curr_index + 1,
+						new_shifts_index_, curr_index, shifts_index_.length
+								- curr_index);
+			}
+		}
+	}
+
+	public void newOutPut() {
+		for (int i = 0; i < shifts_index_.length; i++) {
+			System.out.println(String.valueOf(shifts_chars_, shifts_index_[i],
+					shifts_lines_len_[i]));
+		}
+	}
+
 	public static void main(String[] args) {
 		KWIC kwic = new KWIC();
 		if (args.length != 1) {
@@ -776,9 +840,13 @@ public class KWIC {
 			System.exit(1);
 		}
 		kwic.input(args[0]);
-		kwic.circularShift();
-		kwic.alphabetizing();
-		kwic.output();
+		// kwic.circularShift();
+		kwic.newCircularShift();
+		kwic.filter();
+		// kwic.alphabetizing();
+		kwic.newAlphabetizing();
+		// kwic.output();
+		kwic.newOutPut();
 	}
 
 	// ----------------------------------------------------------------------

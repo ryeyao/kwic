@@ -115,7 +115,7 @@ public class CircularShifter extends Filter{
                 shift += " ";
             }
             shift += '\n';
-            
+//            System.out.println("Circular shift : " + shift);
                 // convert the shift into char array and write it to the output
             char[] chars = shift.toCharArray();
             for(int j = 0; j < chars.length; j++)

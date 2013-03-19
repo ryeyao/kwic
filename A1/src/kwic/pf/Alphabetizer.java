@@ -99,6 +99,7 @@ public class Alphabetizer extends Filter{
           String line = writer.toString();
           lines.add(line);
           writer.reset();
+//          System.out.println("Alpha line : " + line);
         }        
 
         c = input_.read();

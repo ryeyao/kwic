@@ -86,27 +86,37 @@ public class KWIC{
  * @return void
  */
 
-  public void execute(String file){
+  public void execute(String file, String file2){
     try{
       
           // pipes
-      Pipe in_cs = new Pipe();
-      Pipe cs_al = new Pipe();
-      Pipe al_ou = new Pipe();
+      Pipe in_lt = new Pipe();
+      Pipe lt_cs = new Pipe();
+      Pipe cs_sf = new Pipe();
+      Pipe sf_al = new Pipe();
+      Pipe al_lt = new Pipe();
+      Pipe lt_ou = new Pipe();
       
           // input file
       FileInputStream in = new FileInputStream(file);
-
+      FileInputStream inNoise = new FileInputStream(file2);
           // filters connected into a pipeline
-      Input input = new Input(in, in_cs);
-      CircularShifter shifter = new CircularShifter(in_cs, cs_al);
-      Alphabetizer alpha = new Alphabetizer(cs_al, al_ou);
-      Output output = new Output(al_ou);
+      Input input = new Input(in, in_lt);
+      LineTransformer lt = new LineTransformer(in_lt, lt_cs);
+      CircularShifter shifter = new CircularShifter(lt_cs, cs_sf);
+      ShiftFilter sf = new ShiftFilter(cs_sf, sf_al, inNoise);
+      Alphabetizer alpha = new Alphabetizer(sf_al, al_lt);
+      LineTransformer lt2 = new LineTransformer(al_lt, lt_ou);
+      Output output = new Output(lt_ou);
+      
       
           // run it
       input.start();
+      sf.start();
       shifter.start();
+      lt.start();
       alpha.start();
+      lt2.start();
       output.start();
     }catch(IOException exc){
       exc.printStackTrace();
@@ -126,13 +136,13 @@ public class KWIC{
  */
 
   public static void main(String[] args){
-    if(args.length != 1){
+    if(args.length != 2){
       System.err.println("KWIC Usage: java kwic.ms.KWIC file_name");
       System.exit(1);
     }
 
     KWIC kwic = new KWIC();
-    kwic.execute(args[0]);
+    kwic.execute(args[0], args[1]);
   }
 
 //----------------------------------------------------------------------
