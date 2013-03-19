@@ -783,9 +783,9 @@ public class KWIC {
 		int i = first + 1;
 		int j = last;
 		while (true) {
-			while (Character.toLowerCase(shifts_chars_[array[j--]]) > Character.toLowerCase(shifts_chars_[pivot]));
+			while (shifts_chars_[array[j--]] > shifts_chars_[pivot]);
 			j++;
-			while (Character.toLowerCase(shifts_chars_[array[i++]]) < Character.toLowerCase(shifts_chars_[pivot]));
+			while (shifts_chars_[array[i++]] < shifts_chars_[pivot]);
 			i--;
 			// swap the two elements
 			if (i < j) {
