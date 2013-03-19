@@ -33,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 
 import java.util.StringTokenizer;
 import java.util.ArrayList;
@@ -96,12 +97,13 @@ public class Input{
     try{
       
           // open the file for reading
-      BufferedReader reader = new BufferedReader(new FileReader(file));
+//      BufferedReader reader = new BufferedReader(new FileReader(file));
+    	BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
           // read all lines until EOF occurs
           // (Note that all line feed chracters are removed by the readLine() method)
       String line = reader.readLine();
-      while(line != null){
+//      while(line != null){
         
             // parse the line
             // the default delimiter set for StringTokenizer
@@ -129,8 +131,8 @@ public class Input{
         }
         
             // read next line
-        line = reader.readLine();
-      }
+//        line = reader.readLine();
+//      }
       
     }catch(FileNotFoundException exc){
 
