@@ -70,7 +70,8 @@ public class LineStorage{
  * automatically, and copies the elements of the old array into the new one.
  */
 
-  private ArrayList lines_ = new ArrayList();
+//  private ArrayList lines_ = new ArrayList();
+	private ArrayList lines_ = new Line();
 
 //----------------------------------------------------------------------
 /**
@@ -515,7 +516,7 @@ public class LineStorage{
     
     addLine(tmp);
   }
-
+  
 //----------------------------------------------------------------------
 /**
  * Adds a line at the end of the line array.
