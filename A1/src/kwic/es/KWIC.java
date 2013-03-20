@@ -25,6 +25,12 @@
 
 package kwic.es;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
 /*
  * $Log$
 */
@@ -114,9 +120,10 @@ public class KWIC{
  * sorted shifts.
  * @param file name of the input file
  * @return void
+ * @throws IOException 
  */
 
-  public void execute(String file){
+  public void execute(String file) throws IOException{
 
         // initialize all variables
     
@@ -126,8 +133,14 @@ public class KWIC{
         // storage for circular shifts
     LineStorageWrapper shifts = new LineStorageWrapper();
 
+    Map<String, String> wordsIndex = new HashMap<String, String>();
         // input reader
     Input input = new Input();
+    
+    // New added===========================
+    WordsIndex windex = new WordsIndex(wordsIndex);
+    lines.addObserver(windex);
+    // ====================================
 
         // circular shifter
     CircularShifter shifter = new CircularShifter(shifts);
@@ -141,12 +154,33 @@ public class KWIC{
 
         // line printer
     Output output = new Output();
-
-        // read and parse the input file
-    input.parse(file, lines);
-
-        // print sorted shifts
-    output.print(shifts);
+    while (true) {
+		System.out.println("Add, Delete, Print, Index, Quit: ");
+		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+		switch (Character.toLowerCase(stdin.readLine().charAt(0))) {
+		case 'a':
+			input.parse(file, lines);
+			break;
+		case 'd':
+			String lineToDel = stdin.readLine();
+			int lineIndex = lines.findLine(lineToDel);
+			if (lineIndex < 0) {
+				System.out.println("No lines are deleted");
+				break;
+			}
+			lines.deleteLine(lineIndex);
+		case 'i':
+			output.print(windex);
+			break;
+		case 'p':
+			// print sorted shifts
+		    output.print(shifts);
+			break;
+		case 'q':
+			return;
+		}
+	}
+        
   }
 
 //----------------------------------------------------------------------
@@ -159,16 +193,18 @@ public class KWIC{
  * control is passed to it.
  * @param args command line arguments
  * @return void
+ * @throws IOException 
  */
 
-  public static void main(String[] args){
-    if(args.length != 1){
-      System.err.println("KWIC Usage: java kwic.ms.KWIC file_name");
-      System.exit(1);
-    }
+  public static void main(String[] args) throws IOException{
+//    if(args.length != 1){
+//      System.err.println("KWIC Usage: java kwic.ms.KWIC file_name");
+//      System.exit(1);
+//    }
 
     KWIC kwic = new KWIC();
-    kwic.execute(args[0]);
+//    kwic.execute(args[0]);
+    kwic.execute("");
   }
 
 //----------------------------------------------------------------------

@@ -25,6 +25,8 @@
 
 package kwic.es;
 
+import java.util.Map;
+
 /*
  * $Log$
 */
@@ -72,6 +74,14 @@ public class Output{
       
           // print current line
       System.out.println(shift_storage.getLineAsString(i));
+  }
+  
+  public void print(WordsIndex wordsIndex) {
+	  Map<String, String> map = wordsIndex.getWordsIndex();
+	  System.out.println("Words Index:");
+	  for (String word : map.keySet()) {
+		  System.out.println("\t" + word + ": " + map.get(word));
+	  }
   }
 
 //----------------------------------------------------------------------
