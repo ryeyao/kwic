@@ -70,8 +70,7 @@ public class LineStorage{
  * automatically, and copies the elements of the old array into the new one.
  */
 
-//  private ArrayList lines_ = new ArrayList();
-	private ArrayList lines_ = new Line();
+  private ArrayList<Line> lines_ = new ArrayList();
 
 //----------------------------------------------------------------------
 /**
@@ -516,7 +515,7 @@ public class LineStorage{
     
     addLine(tmp);
   }
-  
+
 //----------------------------------------------------------------------
 /**
  * Adds a line at the end of the line array.
@@ -532,7 +531,7 @@ public class LineStorage{
   public void addLine(String[] words){
     
         // create the new line
-    ArrayList current_line = new ArrayList();
+    Line current_line = new Line();
     
         // add words
     for(int i = 0; i < words.length; i++)
@@ -557,7 +556,7 @@ public class LineStorage{
   public void addEmptyLine(){
 
         // create the new line
-    ArrayList current_line = new ArrayList();
+    Line current_line = new Line();
     
         // add the new line at the end
     lines_.add(current_line);

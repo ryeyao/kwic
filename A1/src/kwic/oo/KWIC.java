@@ -84,10 +84,10 @@ public class KWIC {
 	 * @param file
 	 *            name of the input file
 	 * @return void
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 
-	public void execute(String file) throws IOException {
+	public void execute(String file) {
 
 		// initialize all variables
 
@@ -108,25 +108,32 @@ public class KWIC {
 
 		// read and parse the input file
 		// store results in the line storage instance
-		while (true) {
-			System.out.println("Add, Print, Quit: ");
-			BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
-			switch (Character.toLowerCase(stdin.readLine().charAt(0))) {
-			case 'a':
+		try {
+			while (true) {
 				System.out.println("Add, Print, Quit: ");
-				input.parse(file, lines);
-				// make all circular shifts of the original set of lines
-				shifter.setup(lines);
-				// sort all shifts alphabetically
-				alphabetizer.alpha(shifter);
-				break;
-			case 'p':
-				// print sorted shifts
-				output.print(alphabetizer);
-				break;
-			case 'q':
-				return;
+				BufferedReader stdin = new BufferedReader(
+						new InputStreamReader(System.in));
+				switch (Character.toLowerCase(stdin.readLine().charAt(0))) {
+				case 'a':
+					System.out.println("Add, Print, Quit: ");
+					input.parse(file, lines);
+					// make all circular shifts of the original set of lines
+					shifter.setup(lines);
+					// sort all shifts alphabetically
+					alphabetizer.alpha(shifter);
+					break;
+				case 'p':
+					// print sorted shifts
+					output.print(alphabetizer);
+					break;
+				case 'q':
+					return;
+				default:
+					continue;
+				}
 			}
+		} catch (Exception e) {
+			return;
 		}
 	}
 
@@ -152,12 +159,7 @@ public class KWIC {
 
 		KWIC kwic = new KWIC();
 		// kwic.execute(args[0]);
-		try {
-			kwic.execute("");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		kwic.execute("");
 	}
 
 	// ----------------------------------------------------------------------

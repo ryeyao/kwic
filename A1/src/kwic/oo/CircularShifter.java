@@ -58,7 +58,7 @@ public class CircularShifter{
  *
  */
 
-  private LineStorage shifts_;
+  private LineStorage shifts_ = new LineStorage();
 
 //----------------------------------------------------------------------
 /**
@@ -201,6 +201,9 @@ public class CircularShifter{
  */
 
   public int getLineCount(){
+//	  if (shifts_ == null) {
+//		  return 0;
+//	  }
     return shifts_.getLineCount();
   }
 

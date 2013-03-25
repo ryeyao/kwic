@@ -58,7 +58,7 @@ public class Alphabetizer{
  *
  */
 
-  private CircularShifter shifter_;
+  private CircularShifter shifter_ = new CircularShifter();
 
 //----------------------------------------------------------------------
 /**
@@ -105,7 +105,7 @@ public class Alphabetizer{
 
         // create heap
     for(int i = (sorted_.length / 2 - 1); i >= 0; i--)
-      siftDown(i, sorted_.length);
+      shiftDown(i, sorted_.length);
 
         // remove the root and recreate the heap
     for(int i = (sorted_.length - 1); i >= 1; i--){
@@ -116,7 +116,7 @@ public class Alphabetizer{
       sorted_[i] = tmp;
       
           // recreate the heap
-      siftDown(0, i);      
+      shiftDown(0, i);      
       }
   }
 
@@ -127,7 +127,7 @@ public class Alphabetizer{
  * @return void
  */
 
-  private void siftDown(int root, int bottom){    
+  private void shiftDown(int root, int bottom){    
     int max_child = root * 2 + 1;
 
     while(max_child < bottom){
@@ -179,6 +179,9 @@ public class Alphabetizer{
  */
 
   public int getLineCount(){
+//	  if (shifter_ == null) {
+//		  return 0;
+//	  }
     return shifter_.getLineCount();
   }
 

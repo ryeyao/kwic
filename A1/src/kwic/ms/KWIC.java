@@ -114,7 +114,7 @@ public class KWIC {
 
 	private int[][] alphabetized_;
 
-	// New added +++++++++++++++++++++++++++++++++++
+	// Added by Rye Yao +++++++++++++++++++++++++++++++++++
 	private char[] shifts_chars_;
 	private int[] shifts_index_;
 	private int[] shifts_lines_len_;
@@ -803,6 +803,7 @@ public class KWIC {
 		String new_shifts_str = "";
 		for (int curr_index = 0; curr_index < shifts_index_.length; curr_index++) {
 			int shift_index = shifts_index_[curr_index];
+			
 			if (shifts_chars_[shift_index] < '0'
 					|| shifts_chars_[shift_index] > '9') {
 				if (curr_index == shifts_index_.length - 1) {
@@ -816,12 +817,20 @@ public class KWIC {
 					new_shifts_str.concat(tmp);
 				}
 			} else {
+				
 				int[] new_shifts_index_ = new int[shifts_index_.length - 1];
-				System.arraycopy(shifts_index_, 0, new_shifts_index_, 0,
-						curr_index + 1);
-				System.arraycopy(shifts_index_, curr_index + 1,
-						new_shifts_index_, curr_index, shifts_index_.length
-								- curr_index);
+				if (curr_index == shifts_index_.length - 1) {
+					System.arraycopy(shifts_index_, 0, new_shifts_index_, 0,
+							shifts_index_.length - 1);
+				} else {
+					System.arraycopy(shifts_index_, 0, new_shifts_index_, 0,
+							curr_index);
+					System.arraycopy(shifts_index_, curr_index + 1,
+							new_shifts_index_, curr_index, shifts_index_.length
+									- curr_index - 1);
+					shifts_index_ = new_shifts_index_;
+				}
+				
 			}
 		}
 	}
